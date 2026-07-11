@@ -5,7 +5,7 @@
   <!-- Raspberry Pi -->
   <!--
     device/brcm/rpi4 points at this fork/branch instead of upstream
-    raspberry-vanilla/android_device_brcm_rpi4 -- edit YOUR_GITHUB_USERNAME
+    raspberry-vanilla/android_device_brcm_rpi4; edit YOUR_GITHUB_USERNAME
     and BOOT_VARIANT_BRANCH below (scripts/bootstrap.sh does this for you
     via sed if you pass it GITHUB_USER=... and BRANCH=...).
   -->
