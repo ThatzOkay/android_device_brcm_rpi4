@@ -1,0 +1,38 @@
+diff --git a/cpp/watchdog/server/src/WatchdogProcessService.cpp b/cpp/watchdog/server/src/WatchdogProcessService.cpp
+index 72f0acc..1ca2b59 100644
+--- a/cpp/watchdog/server/src/WatchdogProcessService.cpp
++++ b/cpp/watchdog/server/src/WatchdogProcessService.cpp
+@@ -1064,6 +1064,11 @@ Result<void> WatchdogProcessService::updateVhal(const VehiclePropValue& value) {
+         }
+         vhalService = mVhalService;
+     }
++    if (vhalService == nullptr) {
++        std::string errorMsg = "VHAL service is not connected";
++        ALOGW("%s", errorMsg.c_str());
++        return Error() << errorMsg;
++    }
+ 
+     auto halPropValue = vhalService->createHalPropValue(propId);
+     halPropValue->setInt32Values(value.value.int32Values);
+@@ -1116,6 +1121,10 @@ void WatchdogProcessService::queryVhalProperties() {
+     std::vector<VehicleProperty> propIds = {VehicleProperty::WATCHDOG_ALIVE,
+                                             VehicleProperty::WATCHDOG_TERMINATED_PROCESS,
+                                             VehicleProperty::VHAL_HEARTBEAT};
++    if (vhalService == nullptr) {
++        ALOGW("VHAL service is not connected. Skipping VHAL property query.");
++        return;
++    }
+     for (const auto& propId : propIds) {
+         if (auto result = vhalService->getPropConfigs({static_cast<int32_t>(propId)});
+             !result.ok()) {
+@@ -1141,6 +1150,10 @@ void WatchdogProcessService::subscribeToVhalHeartBeat() {
+                 .eventTime = 0,
+                 .value = 0,
+         };
++        if (mVhalService == nullptr) {
++            ALOGW("VHAL service is not connected. Skipping VHAL heartbeat subscription.");
++            return;
++        }
+         propertySubscriptionClient = mVhalService->getSubscriptionClient(mPropertyChangeListener);
+     }
+     std::vector<SubscribeOptions> options = {
