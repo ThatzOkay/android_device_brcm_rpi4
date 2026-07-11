@@ -5,9 +5,9 @@ name: Validate device tree
 # validate the pieces this fork owns.
 on:
   push:
-    branches: [android-15.0-rpi4-1gb-microsd]
+    branches: [android-15.0-rpi4-1gb-microsd, android-15.0-rpi4-1gb-usb]
   pull_request:
-    branches: [android-15.0-rpi4-1gb-microsd]
+    branches: [android-15.0-rpi4-1gb-microsd, android-15.0-rpi4-1gb-usb]
 
 jobs:
   shellcheck:
