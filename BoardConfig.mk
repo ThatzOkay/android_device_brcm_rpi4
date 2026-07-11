@@ -26,6 +26,13 @@ TARGET_SCREEN_DENSITY := 240
 BOARD_CUSTOM_BOOTIMG := true
 BOARD_CUSTOM_BOOTIMG_MK := $(DEVICE_PATH)/mkbootimg.mk
 BOARD_KERNEL_CMDLINE := console=ttyS0,115200 no_console_suspend root=/dev/ram0 rootwait androidboot.hardware=rpi4
+# Boot-media-agnostic /dev/block/by-name/* symlinks: lets first-stage init find
+# the GPT-named partitions whether booting off the SD/eMMC controller or a
+# USB-attached SSD. Platform-bus path fragments (confirmed against
+# system/core/init/devices.cpp FindPlatformDevice()/FindSubsystemDevice()):
+#   SD/eMMC: /sys/devices/platform/emmc2bus/fe340000.mmc/...
+#   USB/xHCI (SSD): /sys/devices/platform/scb/fd500000.pcie/...
+BOARD_KERNEL_CMDLINE += androidboot.boot_devices=emmc2bus/fe340000.mmc,scb/fd500000.pcie
 
 # Manifest
 DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE := $(DEVICE_PATH)/framework_compatibility_matrix.xml

@@ -1,3 +1,8 @@
+# Bootloader UART debug (added 2026-07-11 - temporary, to check EEPROM BOOT_ORDER
+# for USB-MSD support; prints bootloader diagnostics to the UART before Linux
+# starts. Safe to remove after checking.)
+uart_2ndstage=1
+
 # Kernel
 arm_64bit=1
 kernel=Image
