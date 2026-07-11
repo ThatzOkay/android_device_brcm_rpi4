@@ -8,3 +8,11 @@ on fs
 
 on late-fs
     mount_all /vendor/etc/fstab.rpi4 --late
+
+# zram (added 2026-07-11 - activates the zramsize=30% swap entry in
+# fstab.rpi4, gated on persist.sys.zram_enabled set in aosp_rpi4_car.mk)
+on property:sys.boot_completed=1
+    trigger sys-boot-completed-set
+
+on sys-boot-completed-set && property:persist.sys.zram_enabled=1
+    swapon_all /vendor/etc/fstab.rpi4

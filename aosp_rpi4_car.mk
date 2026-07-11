@@ -99,9 +99,30 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.activities_on_secondary_displays.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.activities_on_secondary_displays.xml \
     frameworks/native/data/etc/car_core_hardware.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/car_core_hardware.xml
 
-# Vehicle
+# Vehicle (re-enabled 2026-07-11 - CarService structurally requires a VHAL to
+# exist, even a simulated one; the carwatchdogd null-pointer race that VHAL
+# triggered was fixed separately in WatchdogProcessService.cpp)
 PRODUCT_PACKAGES += \
     android.hardware.automotive.vehicle@V3-default-service
+
+# zram (added 2026-07-11 - RAM-based compressed swap to ease memory pressure
+# on this 1GB board now that VHAL/CarService/evs_app are all enabled; uses
+# fstab.rpi4 zramsize=100% entry, not disk-backed swap, since the SD card is
+# too slow for classic swap)
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.sys.zram_enabled=1
+
+# ro.hw_timeout_multiplier (added 2026-07-11 - AOSP's built-in mechanism for
+# slow hardware/emulators; scales ActivityManagerService's process-start
+# timeouts (PROC_START_TIMEOUT, BIND_APPLICATION_TIMEOUT) and broadcast
+# timeouts together. SystemUI's cold-start ANR trace showed it repeatedly
+# failing the default 15s BIND_APPLICATION_TIMEOUT and getting killed/retried
+# by AMS - this gives slow-starting processes on this board real headroom
+# instead of being killed mid-startup. Same mechanism used by
+# device/generic/goldfish/fvpbase/fvp.mk (at 50x, for an even slower target).
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.hw_timeout_multiplier=3
+
 
 # Device identifier. This must come after all inclusions.
 PRODUCT_DEVICE := rpi4

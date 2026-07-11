@@ -25,6 +25,7 @@ disable_overscan=1
 # Graphics acceleration
 disable_fw_kms_setup=1
 dtoverlay=vc4-kms-v3d
+dtparam=cma-256
 
 # I2C
 #dtparam=i2c_arm=on
