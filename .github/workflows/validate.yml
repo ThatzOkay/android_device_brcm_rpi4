@@ -1,0 +1,51 @@
+name: Validate device tree
+
+# No full AOSP build here: GitHub-hosted runners have nowhere near enough
+# disk/RAM/time for a repo-tool sync + build of this tree. These jobs just
+# validate the pieces this fork owns.
+on:
+  push:
+    branches: [android-15.0-rpi4-1gb-microsd]
+  pull_request:
+    branches: [android-15.0-rpi4-1gb-microsd]
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shellcheck (errors only)
+        # --exclude=SC2068: pre-existing "echo $@" in mkimg.sh/wrimg.sh's
+        # shared exit_with_error() helper, inherited from upstream
+        # raspberry-vanilla, not introduced by this fork.
+        run: shellcheck --severity=error --exclude=SC2068 mkimg.sh wrimg.sh scripts/bootstrap.sh
+
+  validate-local-manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: xmllint local_manifests/*.xml
+        run: |
+          for f in local_manifests/*.xml; do
+            echo "Validating $f"
+            xmllint --noout "$f"
+          done
+
+  validate-car-patch:
+    runs-on: ubuntu-latest
+    env:
+      # commit in AOSP's packages/services/Car that
+      # patches/0001-carwatchdogd-fix-null-vhal-heartbeat-race.patch was
+      # written against.
+      CAR_COMMIT: 33010b871f146ac7148a1d0ae983b061668ec44d
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch packages/services/Car at the patch's base commit
+        run: |
+          git init car-repo
+          cd car-repo
+          git remote add origin https://android.googlesource.com/platform/packages/services/Car
+          git fetch --depth 1 origin "$CAR_COMMIT"
+          git checkout FETCH_HEAD
+      - name: Check the patch still applies cleanly
+        run: git -C car-repo apply --check ../patches/0001-carwatchdogd-fix-null-vhal-heartbeat-race.patch
